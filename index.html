@@ -151,6 +151,126 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-什么是最大流？" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/04/13/%E4%BB%80%E4%B9%88%E6%98%AF%E6%9C%80%E5%A4%A7%E6%B5%81%EF%BC%9F/">什么是最大流？</a>
+    </h1>
+  
+
+        
+        <a href="/2020/04/13/%E4%BB%80%E4%B9%88%E6%98%AF%E6%9C%80%E5%A4%A7%E6%B5%81%EF%BC%9F/" class="archive-article-date">
+  	<time datetime="2020-04-13T00:49:58.318Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-13</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="什么是最大流？"><a href="#什么是最大流？" class="headerlink" title="什么是最大流？"></a>什么是最大流？</h1><p>这里将其定义为边的容量，代表了该边所能通过的最大值。在网络上有很多类比，比如有些类比把有向图看作是水管，容量就是能够通过该水管段最高单位流量。基于此类比，最大流就是从起点到终点所能达到的最高单位流量。为了下文表示上的方便，将容量、最大流都给出一个形式化的定义：</p>
+<p><img src="https:////upload-images.jianshu.io/upload_images/7737311-f693f0246c27c213.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/189" alt="img"></p>
+<p>图3：容量以及最大流定义</p>
+<p>（以上两个公式太丑陋，第一个容量定义公式，可能让读者产生是一个固定值得歧义理解，实际想要表达的含义是容量就是有向边绑定的数值。最大流定义也同样丑陋，实在不知道该如何表示更加好，所以直接使用了中文描述，对于以上丑陋的表达，我深表歉意。）</p>
+<h2 id="最大流的计算方法"><a href="#最大流的计算方法" class="headerlink" title="最大流的计算方法"></a>最大流的计算方法</h2><p>为了有效地描述算法，所以必须在具体描述之前再引入几个定义，（很抱歉，会有这么多定义产生，但还是恳请读者耐心一下）：</p>
+<p>通路：从图起点（S）到达图结束点（T）的路径，由一系列顶点组成；</p>
+<p>通路流量：该通路上所能达到的最大单位流量；</p>
+<p>饱和边：容量等于通路流量的有向边。</p>
+<p><strong>具体算法描述</strong>：</p>
+<blockquote>
+<p>Step1：初始化最大流Flow=0；</p>
+<p>Step2：在图中找一条通路，如果通路不存在，则结束；</p>
+<p>Step3：Flow = Flow+通路流量；</p>
+<p>Step4：对通路上所有边的容量进行更新 Cij = Cij-通路流量；</p>
+<p>Step5：跳转Step2</p>
+</blockquote>
+<p>注意：在上述算法中，当容量为0时，代表该边已经无效，不能作为通路路经中的边。</p>
+<p><strong>算法的有效性解读</strong>：</p>
+<p>这里使用了解读，而没有使用证明，也就表示以下说法是从一种直观的角度来描述，不是严谨的推理证明。算法是有效的，因为当图中已经没有通路的时候，已经不可能再增加图的流量，所以至少已经达到了本次计算过程中的最大流。剩下的另一部份就是如何来说明通路选择的顺序与最终计算的最大流结果无关？如果两条通路之间是独立的，那么先选择的通路不会对后选择的通路产生影响。如果两条通路并非独立，那么也是可以简单证明通路的先后选择与这两条通路上的最大流无关。如果两条通路的可以被证明，那么将两条通路看作一条通路，证明N+1情况下同样成立。</p>
+<h1 id="什么是最小割？"><a href="#什么是最小割？" class="headerlink" title="什么是最小割？"></a>什么是最小割？</h1><p>一个割就是一组边的集合，将给集合边从图中边集合中移除，那么图被分割为两个部分，这两个部分之间没有任何边连接。如果说得有点绕口，那么最简单来说，一块肉被从中间隔开，分成两个部分，中间断开的连接的集合就是割。</p>
+<p>最小割就是将图切割为两个部分时，代价最小的割的集合，代价就是边上容量的和（S部分到T部分边的容量）。还是拿猪肉作类比，最小割就是找到一块肉连接最小的部分，一刀劈开，那个部分的连接就是最小割。</p>
+<h2 id="如何找到这个最小割？"><a href="#如何找到这个最小割？" class="headerlink" title="如何找到这个最小割？"></a>如何找到这个最小割？</h2><p>当一个图被割分成两个部分时，不再存在S到T的通路，所以割的代价必定大于等于图的最大流（这个需要添加额外说明吗？应该不需要吧，算是非常明显的结论了吧）。那么也就是说，割的代码最小不能小于图的最大流，也就是割的代价等于图的最大流。</p>
+<p>现在确定了割的代价，但如何去找到这样一组割？在进行具体算法说明之前，给出额外一个概念：</p>
+<p>影响边：在计算最大流的算法中，会对边的容量进行修改，而将一条通路中修改后容量为0的边称为修改后容量非0边的影响边；</p>
+<blockquote>
+<p>算法描述：</p>
+<p>Step1： 初始化边影响边集合；</p>
+<p>Step2： 初始化最小割边集合；</p>
+<p>Step3： 记录边的原始容量Rij=Cij；</p>
+<p>Step3： 寻找一个通路，如果没有通路，则结束；</p>
+<p>Step4： 修正边的容量Cij = Cij-通路流量；</p>
+<p>Step5： 在通路的边中找一个Cij=0的边，作为预切割边；</p>
+<p>Step6： 如果预切割边的容量等于该边的原始容量（Cij=Rij），那么将该边加入最小割边集合；否则，找到该边的所有影响边，将影响边从最小割边集合中移出，将该边加入最小割边集合；</p>
+<p>Step7： 对通路其他边记录影响边；</p>
+</blockquote>
+<p><strong>算法的有效性解读</strong>：</p>
+<p>算法的核心原理就是在寻找最大流的过程中，找出一组边代价等于最大流，并且能够将遍历的通路有效分割的边。</p>
+<h1 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h1><p>按本文描述算法对最初的图进行最小割求解。</p>
+<p>步骤1：寻找第一个通路</p>
+<p><img src="https:////upload-images.jianshu.io/upload_images/7737311-9930bf02a85ae127.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/713" alt="img"></p>
+<p>图4：第一条通路标记</p>
+<p>红色字体表示该通路的通路流量。根据算法进行容量修正：</p>
+<p><img src="https:////upload-images.jianshu.io/upload_images/7737311-2f1e1b82c95323b2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/713" alt="img"></p>
+<p>图5：第一条通路容量修正</p>
+<p>修改后的容量是用红色字体表示。在此通路中，AC边容量为0，所以将该边加入最小割边集合{AC}，同时记录影响边信息，SA的影响边{AC},CT的影响边{AC}。</p>
+<p>步骤2：寻找第二条通路：</p>
+<p><img src="https:////upload-images.jianshu.io/upload_images/7737311-54bc28e9d64e70b7.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/713" alt="img"></p>
+<p>图6：第二条通路标记</p>
+<p><img src="https:////upload-images.jianshu.io/upload_images/7737311-172ec667c52b0d35.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/713" alt="img"></p>
+<p>图7：第二条通路容量修正</p>
+<p>此时，最小割边集合为{AC，DT}</p>
+<p>步骤3：寻找第三条通路：</p>
+<p><img src="https:////upload-images.jianshu.io/upload_images/7737311-26588d75b4b0ac5d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/713" alt="img"></p>
+<p>图8：第三条通路标记</p>
+<p><img src="https:////upload-images.jianshu.io/upload_images/7737311-ec9c731e1948db82.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/713" alt="img"></p>
+<p>图9：第三条通路容量修正</p>
+<p>此时最小割边集合为：{AC，DT，DC}</p>
+<p>此时，已经不再存在通路，所以当前最小割边集合就是求解的最小割，其代价为23。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2020/04/13/%E4%BB%80%E4%B9%88%E6%98%AF%E6%9C%80%E5%A4%A7%E6%B5%81%EF%BC%9F/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-我的第一篇文章" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
